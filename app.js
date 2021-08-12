@@ -115,27 +115,41 @@ app.get('/auth/google/callback',
 
 
   app.get("/get-list",function(req,res){
+    console.log(req.isAuthenticated())
     //sends the information related to the authenticated user
-    res.send(req.user)
+    if(req.isAuthenticated()){
+      res.send(req.user);
+    }else{
+      res.redirect("http://localhost:3000")
+    }
+    
   })
 
 
 //The root route isnt' actually needed, but I set it up to respond with a status message incase someone gets directed here by accident
 app.get("/",function(req,res){
+    res.redirect("http://localhost:3000");
     res.send({status:"good"});
 })
 
 
 //sets up a route for post requests with updated values for the lists
 app.post("/add-item",function(req,res){
+  console.log(req.user);
+  if(req.isAuthenticated()){
+    User.updateOne({_id:req.user._id},{list:req.body.list},function(err){
+      if(err){
+        //logs the error if there is one
+        console.log(err)
+      }
+    });
+
+  }else{
+    res.redirect("http://localhost:3000")
+  }
 
   //updates the users document with the new list sent from the frontend
-  User.updateOne({_id:req.user._id},{list:req.body.list},function(err){
-    if(err){
-      //logs the error if there is one
-      console.log(err)
-    }
-  });
+  
   
 })
 
